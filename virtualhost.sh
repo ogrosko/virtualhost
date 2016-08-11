@@ -33,7 +33,7 @@ do
 done
 
 if [ "$rootDir" == "" ]; then
-	rootDir=${domain//./}
+	rootDir=${domain}
 fi
 
 ### if root dir starts with '/', don't use /var/www as default starting point
@@ -70,21 +70,21 @@ if [ "$action" == 'create' ]
 		### create virtual host rules file
 		if ! echo "
 		<VirtualHost *:80>
-			ServerAdmin $email
-			ServerName $domain
-			ServerAlias $domain
 			DocumentRoot $rootDir
-			<Directory />
-				AllowOverride All
-			</Directory>
-			<Directory $rootDir>
-				Options Indexes FollowSymLinks MultiViews
-				AllowOverride all
-				Require all granted
-			</Directory>
+			ServerName $domain
+			ServerAdmin $email
+			#ServerAlias $domain
+			SetEnv TYPO3_CONTEXT Development
+
 			ErrorLog /var/log/apache2/$domain-error.log
-			LogLevel error
-			CustomLog /var/log/apache2/$domain-access.log combined
+			#LogLevel error
+			#CustomLog /var/log/apache2/$domain-access.log combined
+			
+			<Directory $rootDir>
+			    Options Indexes FollowSymLinks MultiViews
+			    AllowOverride All
+			    Require all granted
+			</Directory>
 		</VirtualHost>" > $sitesAvailabledomain
 		then
 			echo -e $"There is an ERROR creating $domain file"
