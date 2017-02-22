@@ -8,9 +8,9 @@ domain=$2
 rootDir=$3
 owner=$(who am i | awk '{print $1}')
 email='webmaster@localhost'
-sitesEnable='/etc/apache2/sites-enabled/'
-sitesAvailable='/etc/apache2/sites-available/'
-userDir='/var/www/'
+sitesEnable='/usr/local/etc/apache2/2.4/extra/vhosts/'
+sitesAvailable='/usr/local/etc/apache2/2.4/extra/vhosts/'
+userDir='/Users/ondro/Sites/'
 sitesAvailabledomain=$sitesAvailable$domain.conf
 
 ### don't modify from here unless you know what you are doing ####
@@ -69,23 +69,23 @@ if [ "$action" == 'create' ]
 
 		### create virtual host rules file
 		if ! echo "
-		<VirtualHost *:80>
-			DocumentRoot $rootDir
-			ServerName $domain
-			ServerAdmin $email
-			#ServerAlias $domain
-			SetEnv TYPO3_CONTEXT Development
+<VirtualHost *:80>
+	DocumentRoot $rootDir
+	ServerName $domain
+	ServerAdmin $email
+	#ServerAlias $domain
+	SetEnv TYPO3_CONTEXT Development
 
-			ErrorLog /var/log/apache2/$domain-error.log
-			#LogLevel error
-			#CustomLog /var/log/apache2/$domain-access.log combined
-			
-			<Directory $rootDir>
-			    Options Indexes FollowSymLinks MultiViews
-			    AllowOverride All
-			    Require all granted
-			</Directory>
-		</VirtualHost>" > $sitesAvailabledomain
+	ErrorLog /usr/local/var/log/apache2/$domain-error.log
+	#LogLevel error
+	#CustomLog /usr/local/var/log/apache2/$domain-access.log combined
+
+	<Directory $rootDir>
+	    Options Indexes FollowSymLinks MultiViews
+	    AllowOverride All
+	    Require all granted
+	</Directory>
+</VirtualHost>" > $sitesAvailabledomain
 		then
 			echo -e $"There is an ERROR creating $domain file"
 			exit;
@@ -103,16 +103,16 @@ if [ "$action" == 'create' ]
 		fi
 
 		if [ "$owner" == "" ]; then
-			chown -R $(whoami):$(whoami) $rootDir
+			chown -R $(whoami):staff $rootDir
 		else
-			chown -R $owner:$owner $rootDir
+			chown -R $owner:staff $rootDir
 		fi
 
 		### enable website
-		a2ensite $domain
+		#a2ensite $domain
 
 		### restart Apache
-		/etc/init.d/apache2 reload
+		apachectl -k restart
 
 		### show the finished message
 		echo -e $"Complete! \nYou now have a new Virtual Host \nYour new host is: http://$domain \nAnd its located at $rootDir"
@@ -128,10 +128,10 @@ if [ "$action" == 'create' ]
 			sed -i "/$newhost/d" /etc/hosts
 
 			### disable website
-			a2dissite $domain
+			#a2dissite $domain
 
 			### restart Apache
-			/etc/init.d/apache2 reload
+			apachectl -k restart
 
 			### Delete virtual host rules files
 			rm $sitesAvailabledomain
